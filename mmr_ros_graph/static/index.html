@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MMR ROS Graph</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <div class="brand">MMR <span>ROS Graph</span></div>
+    <div class="status">
+      <span id="live" class="live">live</span>
+      <span id="counts">waiting</span>
+      <button type="button" id="diag-pill" class="diag-pill" hidden title="View graph warnings and errors"></button>
+    </div>
+
+    <div class="toolbar-controls">
+      <label class="field-inline">
+        <span>View</span>
+        <select id="view-mode" aria-label="Graph view mode">
+          <option value="all">Nodes &amp; Topics (all)</option>
+          <option value="active">Nodes &amp; Topics (active)</option>
+          <option value="nodes">Nodes only</option>
+        </select>
+      </label>
+
+      <label class="toggle"><input id="system" type="checkbox"> system</label>
+      <label class="toggle"><input id="hide-leaf" type="checkbox"> hide leaf</label>
+      <label class="toggle"><input id="hide-dead" type="checkbox"> hide dead</label>
+      <label class="toggle"><input id="group-ns" type="checkbox" checked> group ns</label>
+
+      <div class="search-wrap">
+        <input id="search" type="search" placeholder="Search (Ctrl+F)" aria-label="Search nodes, topics, services, actions">
+        <div id="search-results" class="search-results" hidden></div>
+      </div>
+
+      <button type="button" id="export-json" class="btn-header" title="Download graph snapshot JSON">JSON</button>
+      <button type="button" id="export-svg" class="btn-header" title="Download graph SVG diagram">SVG</button>
+      <button type="button" id="toggle-inspector" class="btn-header" aria-pressed="true" title="Slide sidebar in/out (Ctrl+Space)">Panel</button>
+    </div>
+  </header>
+
+  <div id="workspace" class="workspace">
+    <div id="canvas" tabindex="0" aria-label="ROS 2 computation graph canvas">
+      <div id="viewport">
+        <div id="groups"></div>
+        <svg id="wires"></svg>
+        <div id="nodes"></div>
+      </div>
+
+      <button type="button" id="sidebar-peek" class="sidebar-peek" hidden title="Show inspector sidebar (Ctrl+Space)">◀ Panel</button>
+
+      <div id="minimap" class="minimap" hidden aria-label="Graph minimap">
+        <svg id="minimap-svg" viewBox="0 0 200 130"></svg>
+      </div>
+
+      <div class="canvas-controls" role="toolbar" aria-label="Canvas controls">
+        <button type="button" id="zoom-out" title="Zoom out (-)">−</button>
+        <button type="button" id="zoom-reset" title="Reset zoom to 100% (0)">100%</button>
+        <button type="button" id="zoom-in" title="Zoom in (+)">+</button>
+        <span class="sep"></span>
+        <button type="button" id="fit-view" title="Fit graph to view (F)">Fit</button>
+        <button type="button" id="auto-layout" title="Auto-arrange nodes">Layout</button>
+        <button type="button" id="toggle-map" aria-pressed="false" title="Toggle minimap (M)">Map</button>
+      </div>
+
+      <div id="sr-status" class="visually-hidden" aria-live="polite"></div>
+    </div>
+
+    <div id="sidebar-resizer" class="sidebar-resizer" role="separator" aria-orientation="vertical" aria-label="Resize inspector sidebar" tabindex="0"></div>
+
+    <aside id="inspector">
+      <div class="sidebar-top">
+        <div class="tablist" role="tablist" aria-label="Inspector panels">
+          <button type="button" role="tab" id="tab-selection" aria-selected="true" tabindex="0">Selection</button>
+          <button type="button" role="tab" id="tab-console" aria-selected="false" tabindex="-1">
+            Console <span id="log-badge" class="tab-badge" hidden>0</span>
+          </button>
+          <button type="button" role="tab" id="tab-health" aria-selected="false" tabindex="-1">
+            Health <span id="health-badge" class="tab-badge" hidden>0</span>
+          </button>
+        </div>
+        <button type="button" id="sidebar-collapse" class="sidebar-collapse" title="Slide sidebar away (Ctrl+Space)" aria-label="Hide sidebar">»</button>
+      </div>
+
+      <div id="panel-selection" class="tabpanel" role="tabpanel" aria-labelledby="tab-selection" tabindex="0">
+        <div id="detail" class="panel-inner">
+          <p class="muted-note">Click a node or wire to inspect QoS, services, actions, parameters, or live traffic. Drag canvas to pan; scroll to zoom; press <code>Ctrl+F</code> to search.</p>
+        </div>
+      </div>
+
+      <div id="panel-console" class="tabpanel" role="tabpanel" aria-labelledby="tab-console" hidden>
+        <div class="panel-inner console-wrap">
+          <div class="console-toolbar">
+            <select id="log-level" aria-label="Minimum log level">
+              <option value="0">ALL</option>
+              <option value="20">INFO+</option>
+              <option value="30">WARN+</option>
+              <option value="40">ERROR+</option>
+            </select>
+            <label class="toggle-dark"><input id="log-node-only" type="checkbox"> selected node</label>
+            <button type="button" id="log-pause" class="btn-small" aria-pressed="false">Pause</button>
+            <button type="button" id="log-clear" class="btn-small">Clear</button>
+          </div>
+          <div id="log-list" class="log-list"></div>
+        </div>
+      </div>
+
+      <div id="panel-health" class="tabpanel" role="tabpanel" aria-labelledby="tab-health" hidden>
+        <div id="health-list" class="panel-inner"></div>
+      </div>
+    </aside>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
